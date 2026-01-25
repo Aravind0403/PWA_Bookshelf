@@ -8,7 +8,6 @@ import {
   getDoc,
   setDoc,
   Timestamp,
-  initStorage,
 } from 'firebase/firestore';
 import {
   createUserWithEmailAndPassword,
