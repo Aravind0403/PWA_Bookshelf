@@ -2,10 +2,12 @@ import { getCurrentUser } from '../storage';
 import { addBook, getBooks } from '../storage';
 import { fetchBookByISBN, validateISBN, getErrorMessage } from '../api';
 import { ReadingStatus } from '../types';
+import Quagga from '@ericblade/quagga2';
 
 export class ISBNScannerModal {
   private overlay: HTMLElement | null = null;
   private isLoading = false;
+  private isScanning = false;
 
   show(onClose?: () => void) {
     if (this.overlay) {
@@ -34,23 +36,35 @@ export class ISBNScannerModal {
           <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2m0 6v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2m0-6V7a2 2 0 0 1 2-2h2"/>
           </svg>
-          <h2>Enter ISBN Number</h2>
-          <p>ISBN is usually found on the back cover near the barcode</p>
+          <h2>Scan or Enter ISBN</h2>
+          <p>Use camera to scan barcode or enter manually</p>
         </div>
 
-        <div class="form-group">
-          <input type="text" class="input" id="isbnInput" placeholder="Enter ISBN (10 or 13 digits)" maxlength="17">
+        <div class="scanner-tabs">
+          <button class="tab-btn active" id="manualTab">Manual Entry</button>
+          <button class="tab-btn" id="cameraTab">Camera Scan</button>
+        </div>
+
+        <div class="tab-content" id="manualContent">
+          <div class="form-group">
+            <input type="text" class="input" id="isbnInput" placeholder="Enter ISBN (10 or 13 digits)" maxlength="17">
+          </div>
+
+          <button class="btn btn-primary btn-full" id="searchBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            Search Book
+          </button>
+        </div>
+
+        <div class="tab-content hidden" id="cameraContent">
+          <div id="reader" style="width: 100%; max-width: 500px; margin: 0 auto;"></div>
+          <button class="btn btn-secondary btn-full" id="stopScanBtn" style="margin-top: var(--spacing-lg);">Stop Scanning</button>
         </div>
 
         <div class="error-message hidden" id="errorMessage"></div>
-
-        <button class="btn btn-primary btn-full" id="searchBtn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
-          </svg>
-          Search Book
-        </button>
 
         <div class="loading-overlay hidden" id="loadingOverlay">
           <div class="loading-card">
@@ -92,6 +106,102 @@ export class ISBNScannerModal {
         this.searchBook(onClose);
       }
     });
+
+    // Tab switching
+    const manualTab = this.overlay.querySelector('#manualTab');
+    const cameraTab = this.overlay.querySelector('#cameraTab');
+    const manualContent = this.overlay.querySelector('#manualContent');
+    const cameraContent = this.overlay.querySelector('#cameraContent');
+    const stopScanBtn = this.overlay.querySelector('#stopScanBtn');
+
+    manualTab?.addEventListener('click', async () => {
+      await this.stopCameraScanning();
+      manualTab.classList.add('active');
+      cameraTab?.classList.remove('active');
+      manualContent?.classList.remove('hidden');
+      cameraContent?.classList.add('hidden');
+    });
+
+    cameraTab?.addEventListener('click', () => {
+      cameraTab.classList.add('active');
+      manualTab?.classList.remove('active');
+      cameraContent?.classList.remove('hidden');
+      manualContent?.classList.add('hidden');
+      this.startCameraScanning();
+    });
+
+    stopScanBtn?.addEventListener('click', async () => {
+      await this.stopCameraScanning();
+    });
+  }
+
+  private async startCameraScanning() {
+    if (this.isScanning) return;
+
+    const readerDiv = this.overlay?.querySelector('#reader');
+    if (!readerDiv) return;
+
+    this.isScanning = true;
+
+    Quagga.init({
+      inputStream: {
+        type: "LiveStream",
+        target: readerDiv as HTMLElement,
+        constraints: {
+          facingMode: "environment"
+        },
+      },
+      decoder: {
+        readers: ["ean_reader", "ean_8_reader"]
+      }
+    }, (err) => {
+      if (err) {
+        const errorMessage = this.overlay?.querySelector('#errorMessage') as HTMLElement;
+        this.showError(errorMessage, 'Camera access denied or not available.');
+        this.isScanning = false;
+        return;
+      }
+      Quagga.start();
+    });
+
+    Quagga.onDetected((result) => {
+      const code = result.codeResult.code;
+      if (code) {
+        this.stopCameraScanning();
+        this.processScannedISBN(code);
+      }
+    });
+  }
+
+  private async stopCameraScanning() {
+    if (this.isScanning) {
+      Quagga.stop();
+      this.isScanning = false;
+    }
+  }
+
+  private processScannedISBN(isbn: string) {
+    // Clean ISBN
+    const cleanISBN = isbn.replace(/[-\s]/g, '');
+    
+    // Switch to manual tab and fill input
+    const manualTab = this.overlay?.querySelector('#manualTab') as HTMLElement;
+    const cameraTab = this.overlay?.querySelector('#cameraTab') as HTMLElement;
+    const manualContent = this.overlay?.querySelector('#manualContent') as HTMLElement;
+    const cameraContent = this.overlay?.querySelector('#cameraContent') as HTMLElement;
+    const isbnInput = this.overlay?.querySelector('#isbnInput') as HTMLInputElement;
+
+    manualTab?.classList.add('active');
+    cameraTab?.classList.remove('active');
+    manualContent?.classList.remove('hidden');
+    cameraContent?.classList.add('hidden');
+
+    if (isbnInput) {
+      isbnInput.value = cleanISBN;
+    }
+
+    // Auto-search
+    this.searchBook();
   }
 
   private async searchBook(onClose?: () => void) {
@@ -179,6 +289,7 @@ export class ISBNScannerModal {
   }
 
   private close() {
+    this.stopCameraScanning();
     if (this.overlay) {
       document.body.removeChild(this.overlay);
       this.overlay = null;
@@ -186,4 +297,3 @@ export class ISBNScannerModal {
     }
   }
 }
-

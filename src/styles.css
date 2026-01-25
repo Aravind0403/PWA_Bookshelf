@@ -1355,5 +1355,42 @@ body, p {
 .isbn-scanner-modal .btn svg {
   flex-shrink: 0;
 }
+/* Scanner Tabs */
+.scanner-tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-2xl);
+  background: var(--color-medium-brown);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: var(--spacing-lg);
+  background: transparent;
+  border: none;
+  color: var(--color-muted-gold);
+  font-family: var(--font-serif);
+  font-size: clamp(14px, 2vw, 16px);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--color-golden-primary), var(--color-golden-secondary));
+  color: var(--color-dark-brown-base);
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+#reader {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
 }
 
