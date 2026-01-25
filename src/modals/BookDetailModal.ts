@@ -1,5 +1,6 @@
 import { Book, ReadingStatus } from '../types';
-import { updateBook } from '../storage';
+import { updateBook, deleteBook } from '../storage';
+import confetti from 'canvas-confetti';
 
 export class BookDetailModal {
   private overlay: HTMLElement | null = null;
@@ -24,20 +25,22 @@ export class BookDetailModal {
   private getHTML(book: Book): string {
     return `
       <div class="modal-content book-detail-modal">
+        <button class="modal-close" id="closeBtn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+
         <div class="book-detail-header">
           <h2>Book Details</h2>
-          <button class="modal-close" id="closeBtn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18 6L6 18M6 6l12 12"/>
-            </svg>
-          </button>
         </div>
 
         <div class="book-detail-cover">
           ${book.coverImage ? 
             `<img src="${book.coverImage}" alt="${book.title}">` :
             `<div class="book-cover-placeholder-large">
-              <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20"/>
                 <path d="M6.5 2H20V20H6.5C5.837 20 5.201 19.737 4.732 19.268C4.263 18.799 4 18.163 4 17.5V4.5C4 3.837 4.263 3.201 4.732 2.732C5.201 2.263 5.837 2 6.5 2Z"/>
               </svg>
@@ -55,8 +58,7 @@ export class BookDetailModal {
           <div class="status-buttons">
             ${Object.values(ReadingStatus).map(status => `
               <button class="status-btn ${book.status === status ? 'selected' : ''}" 
-                data-status="${status}"
-                style="${book.status === status ? this.getStatusStyle(status) : ''}">
+                data-status="${status}">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   ${this.getStatusIcon(status)}
                 </svg>
@@ -71,6 +73,14 @@ export class BookDetailModal {
             `).join('')}
           </div>
         </div>
+
+        <button class="btn btn-secondary btn-full delete-btn" id="deleteBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          Remove Book
+        </button>
       </div>
     `;
   }
@@ -84,16 +94,6 @@ export class BookDetailModal {
       case ReadingStatus.COMPLETED:
         return '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
     }
-  }
-
-  private getStatusStyle(status: ReadingStatus): string {
-    const colors: Record<ReadingStatus, string> = {
-      [ReadingStatus.TO_READ]: 'var(--color-to-read)',
-      [ReadingStatus.READING]: 'var(--color-reading)',
-      [ReadingStatus.COMPLETED]: 'var(--color-completed)',
-    };
-    // Add opacity to background, keep text fully opaque
-    return `background: linear-gradient(135deg, ${colors[status]}cc, ${colors[status]}99); color: white; font-weight: 600;`;
   }
 
   private attachEventListeners(onUpdate?: () => void) {
@@ -117,6 +117,11 @@ export class BookDetailModal {
         await this.updateStatus(newStatus, onUpdate);
       });
     });
+
+    const deleteBtn = this.overlay.querySelector('#deleteBtn');
+    deleteBtn?.addEventListener('click', async () => {
+      await this.handleDelete(onUpdate);
+    });
   }
 
   private async updateStatus(newStatus: ReadingStatus, onUpdate?: () => void) {
@@ -132,58 +137,41 @@ export class BookDetailModal {
       await updateBook(updatedBook);
       this.currentBook = updatedBook;
 
-      // Show celebration if completed
-      if (newStatus === ReadingStatus.COMPLETED && this.currentBook.status !== ReadingStatus.COMPLETED) {
-        this.showCelebration();
+      // Trigger confetti for completion
+      if (newStatus === ReadingStatus.COMPLETED) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
       }
 
-      // Update UI
-      if (this.overlay) {
-        this.overlay.innerHTML = this.getHTML(updatedBook);
-        this.attachEventListeners(onUpdate);
-      }
-
+      this.close();
       onUpdate?.();
     } catch (error) {
-      alert('Error updating book status. Please try again.');
+      console.error('Failed to update book:', error);
     }
   }
 
-  private showCelebration() {
-    const celebration = document.createElement('div');
-    celebration.className = 'celebration-overlay';
-    celebration.innerHTML = `
-      <div class="celebration-card">
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="celebration-star">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-        <h2>Congratulations!</h2>
-        <p>You finished another book!</p>
-        <p class="celebration-subtitle">Keep up the great reading!</p>
-        <button class="btn btn-primary" id="continueBtn">Continue</button>
-      </div>
-    `;
+  private async handleDelete(onUpdate?: () => void) {
+    if (!this.currentBook) return;
 
-    document.body.appendChild(celebration);
+    const confirmed = confirm(`Remove "${this.currentBook.title}" from your library?`);
+    if (!confirmed) return;
 
-    const continueBtn = celebration.querySelector('#continueBtn');
-    continueBtn?.addEventListener('click', () => {
-      document.body.removeChild(celebration);
-    });
-
-    celebration.addEventListener('click', (e) => {
-      if (e.target === celebration) {
-        document.body.removeChild(celebration);
-      }
-    });
+    try {
+      await deleteBook(this.currentBook.id);
+      this.close();
+      onUpdate?.();
+    } catch (error) {
+      console.error('Failed to delete book:', error);
+    }
   }
 
   private close() {
     if (this.overlay) {
       document.body.removeChild(this.overlay);
       this.overlay = null;
-      this.currentBook = null;
     }
   }
 }
-

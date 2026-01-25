@@ -1392,5 +1392,212 @@ body, p {
   border-radius: var(--radius-md);
   overflow: hidden;
 }
+/* Camera Scanner Visual Guide */
+#reader {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  min-height: 300px;
+  background: var(--color-medium-brown);
+}
+
+#reader::after {
+  content: 'Place barcode here';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 150px;
+  border: 3px solid var(--color-golden-primary);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: var(--spacing-md);
+  color: var(--color-golden-primary);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+#reader video {
+  width: 100%;
+  height: auto;
+}
+
+#reader canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+/* Goal Button Styling */
+.action-btn-goal {
+  background: linear-gradient(135deg, var(--color-golden-primary), var(--color-completed)) !important;
+}
+
+/* Camera Scanner Visual Guide */
+#reader {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  min-height: 300px;
+  background: var(--color-medium-brown);
+}
+
+#reader::after {
+  content: 'Place barcode here';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 150px;
+  border: 3px solid var(--color-golden-primary);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: var(--spacing-md);
+  color: var(--color-golden-primary);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+#reader video {
+  width: 100%;
+  height: auto;
+}
+
+#reader canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Scanner Tabs */
+.scanner-tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-2xl);
+  background: var(--color-medium-brown);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: var(--spacing-lg);
+  background: transparent;
+  border: none;
+  color: var(--color-muted-gold);
+  font-family: var(--font-serif);
+  font-size: clamp(14px, 2vw, 16px);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--color-golden-primary), var(--color-golden-secondary));
+  color: var(--color-dark-brown-base);
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Manual Add Modal - Move Add Button Down */
+.manual-add-modal .form-section:last-of-type {
+  margin-bottom: var(--spacing-2xl);
+}
+
+/* Status Button Fixes */
+.status-btn span {
+  color: inherit !important;
+  opacity: 1 !important;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.status-btn.selected span {
+  color: white !important;
+  font-weight: 600;
+}
+
+.status-btn:not(.selected) {
+  background: rgba(38, 30, 26, 0.6);
+  color: var(--color-warm-cream);
+}
+
+.status-btn svg {
+  flex-shrink: 0;
+}
+
+/* ISBN Scanner Modal Button Fix */
+.isbn-scanner-modal .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.isbn-scanner-modal .btn svg {
+  flex-shrink: 0;
+}
+/* Book Detail Modal Improvements */
+.book-detail-modal {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.book-detail-modal .book-detail-cover {
+  margin-bottom: var(--spacing-2xl);
+  padding: 0;
+}
+
+.book-detail-modal .book-detail-cover img {
+  max-height: 200px;
+  width: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+.book-detail-modal .book-cover-placeholder-large {
+  height: 200px;
+}
+
+.book-detail-modal .modal-close {
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+}
+
+.delete-btn {
+  margin-top: var(--spacing-2xl);
+  background: transparent !important;
+  border: 2px solid var(--color-error) !important;
+  color: var(--color-error) !important;
+}
+
+.delete-btn:hover {
+  background: var(--color-error) !important;
+  color: white !important;
+}
+
+/* Better Status Button Contrast */
+.status-btn {
+  border: 2px solid rgba(217, 191, 140, 0.3);
+}
+
+.status-btn:not(.selected):hover {
+  border-color: var(--color-golden-primary);
+  background: rgba(230, 204, 128, 0.1);
+}
 }
 

@@ -95,6 +95,23 @@ export class ISBNScannerModal {
     const isbnInput = this.overlay.querySelector('#isbnInput') as HTMLInputElement;
     const searchBtn = this.overlay.querySelector('#searchBtn') as HTMLButtonElement;
 
+    // Auto-detect hardware scanner (rapid input)
+    let scannerBuffer = '';
+    let scannerTimeout: NodeJS.Timeout;
+
+    isbnInput?.addEventListener('input', () => {
+      clearTimeout(scannerTimeout);
+      scannerBuffer = isbnInput.value;
+      
+      // If input happens very fast (scanner), auto-search after 100ms
+      scannerTimeout = setTimeout(() => {
+        if (scannerBuffer.length >= 10 && !this.isLoading) {
+          this.searchBook(onClose);
+        }
+        scannerBuffer = '';
+      }, 100);
+    });
+
     isbnInput?.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && !this.isLoading) {
         this.searchBook(onClose);
@@ -148,12 +165,20 @@ export class ISBNScannerModal {
         type: "LiveStream",
         target: readerDiv as HTMLElement,
         constraints: {
+          width: 640,
+          height: 480,
           facingMode: "environment"
         },
       },
+      locator: {
+        patchSize: "medium",
+        halfSample: true
+      },
+      numOfWorkers: 4,
       decoder: {
-        readers: ["ean_reader", "ean_8_reader"]
-      }
+        readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader"]
+      },
+      locate: true
     }, (err) => {
       if (err) {
         const errorMessage = this.overlay?.querySelector('#errorMessage') as HTMLElement;
@@ -164,9 +189,16 @@ export class ISBNScannerModal {
       Quagga.start();
     });
 
+    // Only accept high-confidence scans
     Quagga.onDetected((result) => {
       const code = result.codeResult.code;
-      if (code) {
+      const errors = result.codeResult.decodedCodes
+        .filter((x: any) => x.error !== undefined)
+        .map((x: any) => x.error);
+      const avgError = errors.reduce((a: number, b: number) => a + b, 0) / errors.length;
+
+      // Only accept if error rate is low (high confidence)
+      if (code && avgError < 0.1) {
         this.stopCameraScanning();
         this.processScannedISBN(code);
       }

@@ -22,10 +22,14 @@ export class ManualAddModal {
   private getHTML(): string {
     return `
       <div class="modal-content manual-add-modal">
+        <button class="modal-close" id="cancelBtn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+        
         <div class="modal-header">
-          <button class="modal-close" id="cancelBtn">Cancel</button>
           <h2>Add Book Manually</h2>
-          <button class="btn btn-primary" id="addBtn" disabled>Add</button>
         </div>
 
         <div class="form-section">
@@ -41,7 +45,7 @@ export class ManualAddModal {
         </div>
 
         <div class="form-section">
-          <h3>Cover Image</h3>
+          <h3>Cover Image (Optional)</h3>
           <div class="image-preview-container" id="imagePreview">
             <div class="image-placeholder">
               <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -50,9 +54,11 @@ export class ManualAddModal {
               </svg>
             </div>
           </div>
-          <button type="button" class="btn btn-secondary" id="chooseImageBtn">Choose Image</button>
+          <button type="button" class="btn btn-secondary btn-full" id="chooseImageBtn">Choose Image</button>
           <input type="file" accept="image/*" id="imageInput" style="display: none;">
         </div>
+
+        <button class="btn btn-primary btn-full" id="addBtn" disabled>Add Book</button>
 
         <div class="error-message hidden" id="errorMessage"></div>
       </div>
@@ -165,4 +171,3 @@ export class ManualAddModal {
     }
   }
 }
-
