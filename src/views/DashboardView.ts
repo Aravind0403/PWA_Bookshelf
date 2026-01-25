@@ -27,7 +27,7 @@ export class DashboardView {
 
     container.innerHTML = this.getHTML(stats, greeting, funFact, !!goal);
     
-    this.attachEventListeners(container, stats);
+    this.attachEventListeners(container);
     this.animateOnLoad(container);
     
     return container;
@@ -203,7 +203,7 @@ export class DashboardView {
     `;
   }
 
-  private attachEventListeners(container: HTMLElement, stats: any) {
+  private attachEventListeners(container: HTMLElement) {
     const logoutBtn = container.querySelector('#logoutBtn');
     logoutBtn?.addEventListener('click', () => {
       setCurrentUser(null);

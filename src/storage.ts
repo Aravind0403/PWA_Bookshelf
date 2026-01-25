@@ -149,3 +149,6 @@ export async function setReadingGoal(goal: ReadingGoal): Promise<void> {
 }
 
 
+export function initStorage() {
+  // Empty for now - can be used for future initialization
+}

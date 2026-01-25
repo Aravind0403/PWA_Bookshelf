@@ -1,4 +1,4 @@
-import { Book, ReadingStatus, ReadingStats, ReadingGoal } from './types';
+import {ReadingStatus, ReadingStats } from './types';
 import { getBooks, getReadingGoal } from './storage';
 import { getCurrentUser } from './storage';
 
