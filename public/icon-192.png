@@ -1,0 +1,8 @@
+# PWA Icon Placeholder
+
+This is a placeholder for the PWA icon. In production, you should replace this with actual icon images:
+- icon-192.png (192x192 pixels)
+- icon-512.png (512x512 pixels)
+
+These icons should represent your app and will be used when users install the PWA.
+
