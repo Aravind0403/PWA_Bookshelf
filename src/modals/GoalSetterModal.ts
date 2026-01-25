@@ -14,7 +14,7 @@ export class GoalSetterModal {
     this.overlay.className = 'modal-overlay';
     this.overlay.innerHTML = this.getHTML(currentGoal);
     
-    this.attachEventListeners(currentGoal, onClose);
+    this.attachEventListeners(onClose);
     
     document.body.appendChild(this.overlay);
   }
@@ -72,7 +72,7 @@ export class GoalSetterModal {
     `;
   }
 
-  private attachEventListeners(currentGoal?: ReadingGoal, onClose?: () => void) {
+  private attachEventListeners(onClose?: () => void) {
     if (!this.overlay) return;
 
     const closeBtn = this.overlay.querySelector('#closeBtn');

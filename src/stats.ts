@@ -1,16 +1,6 @@
-import {ReadingStatus, ReadingStats } from './types';
-import { getBooks, getReadingGoal } from './storage';
-import { getCurrentUser } from './storage';
+import { Book, ReadingGoal, ReadingStatus, ReadingStats } from './types';
 
-export async function calculateStats(): Promise<ReadingStats> {
-  const currentUser = getCurrentUser();
-  if (!currentUser) {
-    return getDefaultStats();
-  }
-
-  const books = await getBooks(currentUser.id);
-  const goal = await getReadingGoal(currentUser.id);
-
+export async function calculateStats(books: Book[], goal?: ReadingGoal): Promise<ReadingStats> {
   const now = new Date();
   const currentYear = now.getFullYear();
   const yearStart = new Date(currentYear, 0, 1);
@@ -58,22 +48,6 @@ export async function calculateStats(): Promise<ReadingStats> {
     booksNeededPerMonth,
     isAheadOfSchedule,
     motivationalMessage,
-  };
-}
-
-function getDefaultStats(): ReadingStats {
-  return {
-    totalBooks: 0,
-    toRead: 0,
-    reading: 0,
-    completed: 0,
-    completedThisYear: 0,
-    yearlyGoal: null,
-    progressPercentage: 0,
-    daysRemainingInYear: 365,
-    booksNeededPerMonth: 0,
-    isAheadOfSchedule: false,
-    motivationalMessage: 'Start your reading journey by adding your first book!',
   };
 }
 
@@ -132,4 +106,3 @@ export function getFunFact(stats: ReadingStats): string {
 
   return facts[Math.floor(Math.random() * facts.length)];
 }
-

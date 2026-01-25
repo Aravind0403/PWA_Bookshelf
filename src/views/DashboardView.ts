@@ -33,7 +33,7 @@ export class DashboardView {
   }
 
   private async getHTML(email: string): Promise<string> {
-    const stats = await calculateStats(this.books, this.goal);
+    const stats = await calculateStats(this.books,this.goal);
 
     return `
       <nav class="dashboard-nav">
