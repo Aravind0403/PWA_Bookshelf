@@ -1322,5 +1322,27 @@ body, p {
     flex-direction: column;
     gap: var(--spacing-lg);
   }
+
+  /* Status Button Fixes */
+.status-btn span {
+  color: inherit !important;
+  opacity: 1 !important;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.status-btn.selected span {
+  color: white !important;
+  font-weight: 600;
+}
+
+.status-btn:not(.selected) {
+  background: rgba(38, 30, 26, 0.6);
+  color: var(--color-warm-cream);
+}
+
+.status-btn svg {
+  flex-shrink: 0;
+}
 }
 

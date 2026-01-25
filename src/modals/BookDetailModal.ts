@@ -92,7 +92,8 @@ export class BookDetailModal {
       [ReadingStatus.READING]: 'var(--color-reading)',
       [ReadingStatus.COMPLETED]: 'var(--color-completed)',
     };
-    return `background: linear-gradient(135deg, ${colors[status]}, ${colors[status]}dd); color: var(--color-dark-brown-base);`;
+    // Add opacity to background, keep text fully opaque
+    return `background: linear-gradient(135deg, ${colors[status]}cc, ${colors[status]}99); color: white; font-weight: 600;`;
   }
 
   private attachEventListeners(onUpdate?: () => void) {
