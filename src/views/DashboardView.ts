@@ -24,7 +24,7 @@ export class DashboardView {
     this.books = await getBooks(currentUser.id);
     this.goal = await getReadingGoal(currentUser.id);
 
-    container.innerHTML = await this.getHTML(currentUser.email);
+    container.innerHTML = await this.getHTML();
     
     this.attachEventListeners(container);
     this.startFunFactRotation(container);
@@ -32,7 +32,7 @@ export class DashboardView {
     return container;
   }
 
-  private async getHTML(email: string): Promise<string> {
+  private async getHTML(): Promise<string> {
     const stats = await calculateStats(this.books,this.goal);
 
     return `
