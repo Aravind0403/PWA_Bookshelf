@@ -1344,5 +1344,16 @@ body, p {
 .status-btn svg {
   flex-shrink: 0;
 }
+/* ISBN Scanner Modal Button Fix */
+.isbn-scanner-modal .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.isbn-scanner-modal .btn svg {
+  flex-shrink: 0;
+}
 }
 
