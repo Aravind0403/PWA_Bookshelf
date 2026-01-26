@@ -1630,5 +1630,457 @@ body, p {
   border-radius: var(--radius-md);
   max-height: 400px;
 }
+/* ===== MOBILE RESPONSIVE FIXES ===== */
+
+@media (max-width: 768px) {
+  /* General Modal Improvements */
+  .modal-overlay {
+    padding: var(--spacing-sm);
+    align-items: flex-start;
+    padding-top: var(--spacing-2xl);
+  }
+
+  .modal-content {
+    max-width: 100%;
+    width: 100%;
+    max-height: 90vh;
+    padding: var(--spacing-xl);
+    margin: 0;
+    overflow-y: auto;
+  }
+
+  /* Close button - bigger touch target */
+  .modal-close {
+    width: 40px;
+    height: 40px;
+    padding: var(--spacing-sm);
+  }
+
+  /* Book Detail Modal */
+  .book-detail-modal {
+    max-height: 85vh;
+    padding: var(--spacing-lg);
+  }
+
+  .book-detail-header {
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .book-detail-header h2 {
+    font-size: 20px;
+  }
+
+  .book-detail-cover {
+    margin-bottom: var(--spacing-xl);
+    padding: 0;
+  }
+
+  .book-detail-cover img {
+    max-height: 160px;
+  }
+
+  .book-cover-placeholder-large {
+    height: 160px;
+  }
+
+  .book-cover-placeholder-large svg {
+    width: 60px;
+    height: 60px;
+  }
+
+  .book-detail-title {
+    font-size: 20px !important;
+  }
+
+  .book-detail-author {
+    font-size: 16px !important;
+  }
+
+  /* Reading Status Section */
+  .reading-status-section {
+    padding: var(--spacing-lg);
+  }
+
+  .reading-status-section h3 {
+    font-size: 16px;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .status-buttons {
+    gap: var(--spacing-sm);
+  }
+
+  .status-btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 14px;
+    min-height: 48px;
+  }
+
+  .status-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .status-btn span {
+    font-size: 14px;
+  }
+
+  /* Delete button */
+  .delete-btn {
+    margin-top: var(--spacing-xl);
+    font-size: 14px;
+  }
+
+  /* Dashboard View */
+  .dashboard-view {
+    padding: var(--spacing-lg);
+  }
+
+  .welcome-header {
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .welcome-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .welcome-title {
+    font-size: 28px !important;
+  }
+
+  /* Stats Grid - 2 columns */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  .stat-card {
+    padding: var(--spacing-lg);
+  }
+
+  .stat-card svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  /* Goal Progress Card */
+  .goal-progress-card {
+    padding: var(--spacing-2xl);
+  }
+
+  .progress-ring-container svg {
+    width: 160px;
+    height: 160px;
+  }
+
+  .progress-ring circle {
+    r: 70;
+  }
+
+  .progress-number {
+    font-size: 40px;
+  }
+
+  .progress-of {
+    font-size: 16px;
+  }
+
+  .progress-label {
+    font-size: 12px;
+  }
+
+  .motivational-message {
+    font-size: 14px;
+  }
+
+  .progress-stats {
+    flex-direction: row;
+    gap: var(--spacing-lg);
+  }
+
+  .progress-stat-value {
+    font-size: 20px;
+  }
+
+  .progress-stat-label {
+    font-size: 11px;
+  }
+
+  /* Fun Fact Card */
+  .fun-fact-card {
+    padding: var(--spacing-lg);
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .fun-fact-card svg {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .fun-fact-title {
+    font-size: 14px;
+  }
+
+  .fun-fact-content {
+    font-size: 13px;
+  }
+
+  /* Quick Actions */
+  .action-btn {
+    padding: var(--spacing-lg);
+    font-size: 15px;
+  }
+
+  .action-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Bookshelf View */
+  .bookshelf-container {
+    padding: var(--spacing-lg);
+  }
+
+  .bookshelf-nav {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: stretch;
+  }
+
+  .bookshelf-title {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .search-container {
+    width: 100%;
+  }
+
+  /* Books Grid - 3 columns on mobile */
+  .books-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .book-card {
+    padding: var(--spacing-xs);
+  }
+
+  .book-cover {
+    height: 110px;
+  }
+
+  .book-cover-placeholder {
+    height: 110px;
+  }
+
+  .book-cover-placeholder svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .book-title {
+    font-size: 11px;
+  }
+
+  .book-author {
+    font-size: 10px;
+  }
+
+  /* FAB Buttons */
+  .fab-container {
+    bottom: var(--spacing-lg);
+    left: var(--spacing-lg);
+    right: var(--spacing-lg);
+    gap: var(--spacing-md);
+  }
+
+  .fab {
+    width: 56px;
+    height: 56px;
+  }
+
+  .fab svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .fab-add {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* Scanner Modal */
+  .scanner-header svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .scanner-header h2 {
+    font-size: 20px;
+  }
+
+  .scanner-header p {
+    font-size: 13px;
+  }
+
+  .scanner-tabs {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .tab-btn {
+    padding: var(--spacing-md);
+    font-size: 14px;
+  }
+
+  #reader {
+    min-height: 250px;
+    max-height: 350px;
+  }
+
+  #reader::after {
+    width: 200px;
+    height: 120px;
+    font-size: 11px;
+    padding-bottom: var(--spacing-sm);
+  }
+
+  #reader video {
+    max-height: 350px;
+  }
+
+  .scanner-tips {
+    padding: var(--spacing-md);
+    font-size: 13px;
+  }
+
+  .scanner-tips ul {
+    padding-left: var(--spacing-lg);
+  }
+
+  .scanner-tips li {
+    font-size: 12px;
+  }
+
+  /* Goal Setter Modal */
+  .goal-setter-modal {
+    padding: var(--spacing-xl);
+  }
+
+  .goal-setter-header svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .goal-setter-header h2 {
+    font-size: 20px;
+  }
+
+  .goal-setter-header p {
+    font-size: 14px;
+  }
+
+  .popular-goals-grid {
+    gap: var(--spacing-md);
+  }
+
+  .quick-goal-btn {
+    padding: var(--spacing-lg);
+  }
+
+  .quick-goal-number {
+    font-size: 28px;
+  }
+
+  .quick-goal-label {
+    font-size: 12px;
+  }
+
+  /* Manual Add Modal */
+  .manual-add-modal h2 {
+    font-size: 20px;
+  }
+
+  .manual-add-modal h3 {
+    font-size: 16px;
+  }
+
+  .image-preview-container {
+    min-height: 180px;
+  }
+
+  /* Form Elements - Prevent iOS zoom */
+  .input {
+    font-size: 16px !important;
+    padding: var(--spacing-lg);
+  }
+
+  .btn {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    font-size: 16px !important;
+    min-height: 48px;
+  }
+
+  /* Navigation */
+  .nav-btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 14px;
+  }
+
+  /* First Time Prompt */
+  .first-time-prompt {
+    padding: var(--spacing-3xl);
+  }
+
+  .first-time-prompt svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .first-time-prompt h2 {
+    font-size: 22px;
+  }
+
+  .first-time-prompt p {
+    font-size: 14px;
+  }
+}
+
+/* Small phones (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  .books-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .modal-content {
+    padding: var(--spacing-md);
+  }
+
+  .book-detail-modal {
+    padding: var(--spacing-md);
+  }
+
+  .status-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .progress-stats {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .progress-divider {
+    display: none;
+  }
+}
 }
 
