@@ -2,12 +2,13 @@ import { getCurrentUser } from '../storage';
 import { addBook, getBooks } from '../storage';
 import { fetchBookByISBN, validateISBN, getErrorMessage } from '../api';
 import { ReadingStatus } from '../types';
-import Quagga from '@ericblade/quagga2';
+import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
 
 export class ISBNScannerModal {
   private overlay: HTMLElement | null = null;
   private isLoading = false;
   private isScanning = false;
+  private codeReader: BrowserMultiFormatReader | null = null;
 
   show(onClose?: () => void) {
     if (this.overlay) {
@@ -60,7 +61,16 @@ export class ISBNScannerModal {
         </div>
 
         <div class="tab-content hidden" id="cameraContent">
-          <div id="reader" style="width: 100%; max-width: 500px; margin: 0 auto;"></div>
+          <div class="scanner-tips">
+            <p>📱 Tips for better scanning:</p>
+            <ul>
+              <li>Hold phone steady</li>
+              <li>Good lighting helps</li>
+              <li>Fill the yellow box with barcode</li>
+              <li>Keep barcode flat, not angled</li>
+            </ul>
+          </div>
+          <div id="reader"></div>
           <button class="btn btn-secondary btn-full" id="stopScanBtn" style="margin-top: var(--spacing-lg);">Stop Scanning</button>
         </div>
 
@@ -159,55 +169,53 @@ export class ISBNScannerModal {
     if (!readerDiv) return;
 
     this.isScanning = true;
+    this.codeReader = new BrowserMultiFormatReader();
 
-    Quagga.init({
-      inputStream: {
-        type: "LiveStream",
-        target: readerDiv as HTMLElement,
-        constraints: {
-          width: 640,
-          height: 480,
-          facingMode: "environment"
-        },
-      },
-      locator: {
-        patchSize: "medium",
-        halfSample: true
-      },
-      numOfWorkers: 4,
-      decoder: {
-        readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader"]
-      },
-      locate: true
-    }, (err) => {
-      if (err) {
-        const errorMessage = this.overlay?.querySelector('#errorMessage') as HTMLElement;
-        this.showError(errorMessage, 'Camera access denied or not available.');
-        this.isScanning = false;
-        return;
-      }
-      Quagga.start();
-    });
+    try {
+      // Create video element
+      const videoElement = document.createElement('video');
+      videoElement.style.width = '100%';
+      videoElement.style.height = 'auto';
+      videoElement.style.maxHeight = '400px';
+      videoElement.setAttribute('playsinline', 'true');
+      readerDiv.appendChild(videoElement);
 
-    // Only accept high-confidence scans
-    Quagga.onDetected((result) => {
-      const code = result.codeResult.code;
-      const errors = result.codeResult.decodedCodes
-        .filter((x: any) => x.error !== undefined)
-        .map((x: any) => x.error);
-      const avgError = errors.reduce((a: number, b: number) => a + b, 0) / errors.length;
-
-      // Only accept if error rate is low (high confidence)
-      if (code && avgError < 0.1) {
-        this.stopCameraScanning();
-        this.processScannedISBN(code);
-      }
-    });
+      // Start decoding
+      await this.codeReader.decodeFromVideoDevice(
+        undefined, // Use default back camera
+        videoElement,
+        (result, error) => {
+          if (result) {
+            const code = result.getText();
+            console.log('Barcode detected:', code);
+            this.stopCameraScanning();
+            this.processScannedISBN(code);
+          }
+          // Ignore NotFoundException - it's normal during scanning
+          if (error && !(error instanceof NotFoundException)) {
+            console.error('Scanner error:', error);
+          }
+        }
+      );
+    } catch (err) {
+      console.error('Camera error:', err);
+      const errorMessage = this.overlay?.querySelector('#errorMessage') as HTMLElement;
+      this.showError(errorMessage, 'Camera access denied or not available.');
+      this.isScanning = false;
+    }
   }
 
   private async stopCameraScanning() {
-    if (this.isScanning) {
-      Quagga.stop();
+    if (this.codeReader && this.isScanning) {
+      this.codeReader.reset();
+      
+      // Clear video element
+      const readerDiv = this.overlay?.querySelector('#reader');
+      if (readerDiv) {
+        readerDiv.innerHTML = '';
+      }
+      
+      this.codeReader = null;
       this.isScanning = false;
     }
   }
