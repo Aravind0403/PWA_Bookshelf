@@ -2082,5 +2082,58 @@ body, p {
     display: none;
   }
 }
+/* Scanner Tabs - Mobile Fixes */
+@media (max-width: 768px) {
+  .scanner-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: var(--spacing-xl);
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-sm);
+    padding: 6px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 12px 8px;
+    background: transparent;
+    border: none;
+    color: var(--color-muted-gold);
+    font-family: var(--font-serif);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--color-golden-primary), var(--color-golden-secondary));
+    color: var(--color-dark-brown-base);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Alternative: Shorter text on mobile */
+  .tab-btn#manualTab::after {
+    content: 'Manual';
+  }
+  
+  .tab-btn#cameraTab::after {
+    content: 'Camera';
+  }
+
+  .tab-btn#manualTab,
+  .tab-btn#cameraTab {
+    font-size: 0; /* Hide original text */
+  }
+
+  .tab-btn::after {
+    font-size: 14px;
+    font-weight: 600;
+  }
+}
 }
 
