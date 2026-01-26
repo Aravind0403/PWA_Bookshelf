@@ -2,7 +2,7 @@ import { getCurrentUser } from '../storage';
 import { addBook, getBooks } from '../storage';
 import { fetchBookByISBN, validateISBN, getErrorMessage } from '../api';
 import { ReadingStatus } from '../types';
-import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
+import { BrowserMultiFormatReader } from '@zxing/library';
 
 export class ISBNScannerModal {
   private overlay: HTMLElement | null = null;
@@ -163,48 +163,43 @@ export class ISBNScannerModal {
   }
 
   private async startCameraScanning() {
-    if (this.isScanning) return;
+  if (this.isScanning) return;
 
-    const readerDiv = this.overlay?.querySelector('#reader');
-    if (!readerDiv) return;
+  const readerDiv = this.overlay?.querySelector('#reader');
+  if (!readerDiv) return;
 
-    this.isScanning = true;
-    this.codeReader = new BrowserMultiFormatReader();
+  this.isScanning = true;
+  this.codeReader = new BrowserMultiFormatReader();
 
-    try {
-      // Create video element
-      const videoElement = document.createElement('video');
-      videoElement.style.width = '100%';
-      videoElement.style.height = 'auto';
-      videoElement.style.maxHeight = '400px';
-      videoElement.setAttribute('playsinline', 'true');
-      readerDiv.appendChild(videoElement);
+  try {
+    // Create video element
+    const videoElement = document.createElement('video');
+    videoElement.style.width = '100%';
+    videoElement.style.height = 'auto';
+    videoElement.style.maxHeight = '400px';
+    videoElement.setAttribute('playsinline', 'true');
+    readerDiv.appendChild(videoElement);
 
-      // Start decoding
-      await this.codeReader.decodeFromVideoDevice(
-        undefined, // Use default back camera
-        videoElement,
-        (result, error) => {
-          if (result) {
-            const code = result.getText();
-            console.log('Barcode detected:', code);
-            this.stopCameraScanning();
-            this.processScannedISBN(code);
-          }
-          // Ignore NotFoundException - it's normal during scanning
-          if (error && !(error instanceof NotFoundException)) {
-            console.error('Scanner error:', error);
-          }
+    // Start continuous decoding
+    this.codeReader.decodeFromVideoDevice(
+      null, // Use default back camera (changed from undefined)
+      videoElement,
+      (result) => {
+        if (result) {
+          const code = result.getText();
+          console.log('Barcode detected:', code);
+          this.stopCameraScanning();
+          this.processScannedISBN(code);
         }
-      );
-    } catch (err) {
-      console.error('Camera error:', err);
-      const errorMessage = this.overlay?.querySelector('#errorMessage') as HTMLElement;
-      this.showError(errorMessage, 'Camera access denied or not available.');
-      this.isScanning = false;
-    }
+      }
+    );
+  } catch (err) {
+    console.error('Camera error:', err);
+    const errorMessage = this.overlay?.querySelector('#errorMessage') as HTMLElement;
+    this.showError(errorMessage, 'Camera access denied or not available.');
+    this.isScanning = false;
   }
-
+}
   private async stopCameraScanning() {
     if (this.codeReader && this.isScanning) {
       this.codeReader.reset();
