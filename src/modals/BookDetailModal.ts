@@ -1,5 +1,6 @@
 import { Book, ReadingStatus } from '../types';
 import { updateBook, deleteBook } from '../storage';
+import { escapeHTML, showToast, trapFocus } from '../utils';
 import confetti from 'canvas-confetti';
 
 export class BookDetailModal {
@@ -24,7 +25,7 @@ export class BookDetailModal {
 
   private getHTML(book: Book): string {
     return `
-      <div class="modal-content book-detail-modal">
+      <div class="modal-content book-detail-modal" role="dialog" aria-modal="true" aria-label="Book Details">
         <button class="modal-close" id="closeBtn">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"/>
@@ -37,8 +38,8 @@ export class BookDetailModal {
         </div>
 
         <div class="book-detail-cover">
-          ${book.coverImage ? 
-            `<img src="${book.coverImage}" alt="${book.title}">` :
+          ${book.coverImage ?
+            `<img src="${book.coverImage}" alt="${escapeHTML(book.title)}">` :
             `<div class="book-cover-placeholder-large">
               <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20"/>
@@ -49,8 +50,8 @@ export class BookDetailModal {
         </div>
 
         <div class="book-detail-info">
-          <h1 class="book-detail-title">${book.title}</h1>
-          <p class="book-detail-author">by ${book.author}</p>
+          <h1 class="book-detail-title">${escapeHTML(book.title)}</h1>
+          <p class="book-detail-author">by ${escapeHTML(book.author)}</p>
         </div>
 
         <div class="reading-status-section">
@@ -110,6 +111,15 @@ export class BookDetailModal {
       }
     });
 
+    // Escape key & focus trap
+    const escapeHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { this.close(); }
+    };
+    document.addEventListener('keydown', escapeHandler);
+    const removeTrap = trapFocus(this.overlay);
+    const origClose = this.close.bind(this);
+    this.close = () => { document.removeEventListener('keydown', escapeHandler); removeTrap(); origClose(); };
+
     const statusBtns = this.overlay.querySelectorAll('.status-btn');
     statusBtns.forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -149,7 +159,7 @@ export class BookDetailModal {
       this.close();
       onUpdate?.();
     } catch (error) {
-      console.error('Failed to update book:', error);
+      showToast('Failed to update book. Please try again.', 'error');
     }
   }
 
@@ -164,7 +174,7 @@ export class BookDetailModal {
       this.close();
       onUpdate?.();
     } catch (error) {
-      console.error('Failed to delete book:', error);
+      showToast('Failed to delete book. Please try again.', 'error');
     }
   }
 

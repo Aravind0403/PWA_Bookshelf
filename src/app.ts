@@ -7,11 +7,18 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 import { setCurrentUser } from './storage';
 
+interface Destroyable {
+  destroy?(): void;
+}
+
 export class App {
   private currentView: HTMLElement | null = null;
+  private currentViewInstance: Destroyable | null = null;
+  private renderGeneration = 0;
 
   init() {
-    // Listen for auth state changes
+    // Listen for auth state changes — fires immediately with current state,
+    // so no separate this.render() call needed (avoids duplicate rendering).
     onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser({
@@ -25,8 +32,6 @@ export class App {
       this.render();
     });
 
-    // Initial render attempt (will likely show loading or login until auth resolves)
-    this.render();
     window.addEventListener('popstate', () => this.render());
   }
 
@@ -34,24 +39,34 @@ export class App {
     const app = document.getElementById('app');
     if (!app) return;
 
-    const currentUser = getCurrentUser();
+    // Guard against concurrent renders: if a newer render starts while
+    // an older async render is awaiting, the older one bails out.
+    const generation = ++this.renderGeneration;
 
-    // Clear previous view
-    if (this.currentView) {
-      // Basic cleanup if needed
-      app.innerHTML = '';
-    }
+    // Destroy previous view before rendering new one
+    this.currentViewInstance?.destroy?.();
+
+    const currentUser = getCurrentUser();
+    app.innerHTML = '';
 
     // Render appropriate view
     if (!currentUser || !currentUser.isLoggedIn) {
-      this.currentView = new LoginView().render();
+      const view = new LoginView();
+      this.currentView = view.render();
+      this.currentViewInstance = view;
       app.appendChild(this.currentView);
     } else {
       const path = window.location.pathname;
       if (path === '/bookshelf' || path === '/bookshelf/') {
-        this.currentView = await new BookshelfView().render();
+        const view = new BookshelfView();
+        this.currentView = await view.render();
+        if (generation !== this.renderGeneration) return; // stale render
+        this.currentViewInstance = view;
       } else {
-        this.currentView = await new DashboardView().render();
+        const view = new DashboardView();
+        this.currentView = await view.render();
+        if (generation !== this.renderGeneration) return; // stale render
+        this.currentViewInstance = view;
       }
       app.appendChild(this.currentView);
     }

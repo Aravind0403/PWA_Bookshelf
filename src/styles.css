@@ -60,6 +60,10 @@ body {
   color: var(--color-warm-cream);
   min-height: 100vh;
   overflow-x: hidden;
+  /* iPhone safe areas */
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 #app {
@@ -802,7 +806,7 @@ body, p {
 /* Bookshelf View Styles */
 .bookshelf-view {
   min-height: 100vh;
-  padding-bottom: 120px;
+  padding-bottom: calc(120px + env(safe-area-inset-bottom));
 }
 
 .bookshelf-container {
@@ -879,14 +883,16 @@ body, p {
   color: var(--color-muted-gold);
 }
 
-.book-status-badge {
-  position: absolute;
-  top: var(--spacing-xs);
-  right: var(--spacing-xs);
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid var(--color-dark-brown-base);
+.book-status-pill {
+  display: inline-block;
+  margin-top: var(--spacing-xs);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .book-info {
@@ -931,7 +937,7 @@ body, p {
 
 .fab-container {
   position: fixed;
-  bottom: var(--spacing-xl);
+  bottom: calc(var(--spacing-xl) + env(safe-area-inset-bottom));
   left: var(--spacing-xl);
   right: var(--spacing-xl);
   display: flex;
@@ -1320,119 +1326,11 @@ body, p {
     bottom: var(--spacing-3xl);
     width: auto;
     flex-direction: column;
+    align-items: flex-end;
     gap: var(--spacing-lg);
   }
-
-  /* Status Button Fixes */
-.status-btn span {
-  color: inherit !important;
-  opacity: 1 !important;
-  z-index: 1;
-  pointer-events: none;
 }
 
-.status-btn.selected span {
-  color: white !important;
-  font-weight: 600;
-}
-
-.status-btn:not(.selected) {
-  background: rgba(38, 30, 26, 0.6);
-  color: var(--color-warm-cream);
-}
-
-.status-btn svg {
-  flex-shrink: 0;
-}
-/* ISBN Scanner Modal Button Fix */
-.isbn-scanner-modal .btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-md);
-}
-
-.isbn-scanner-modal .btn svg {
-  flex-shrink: 0;
-}
-/* Scanner Tabs */
-.scanner-tabs {
-  display: flex;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-2xl);
-  background: var(--color-medium-brown);
-  border-radius: var(--radius-sm);
-  padding: var(--spacing-xs);
-}
-
-.tab-btn {
-  flex: 1;
-  padding: var(--spacing-lg);
-  background: transparent;
-  border: none;
-  color: var(--color-muted-gold);
-  font-family: var(--font-serif);
-  font-size: clamp(14px, 2vw, 16px);
-  font-weight: 600;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: all 0.3s ease;
-}
-
-.tab-btn.active {
-  background: linear-gradient(135deg, var(--color-golden-primary), var(--color-golden-secondary));
-  color: var(--color-dark-brown-base);
-}
-
-.tab-content {
-  animation: fadeIn 0.3s ease;
-}
-
-#reader {
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-/* Camera Scanner Visual Guide */
-#reader {
-  position: relative;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  min-height: 300px;
-  background: var(--color-medium-brown);
-}
-
-#reader::after {
-  content: 'Place barcode here';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 250px;
-  height: 150px;
-  border: 3px solid var(--color-golden-primary);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-  pointer-events: none;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: var(--spacing-md);
-  color: var(--color-golden-primary);
-  font-size: 14px;
-  font-weight: 600;
-  text-align: center;
-}
-
-#reader video {
-  width: 100%;
-  height: auto;
-}
-
-#reader canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
 /* Goal Button Styling */
 .action-btn-goal {
   background: linear-gradient(135deg, var(--color-golden-primary), var(--color-completed)) !important;
@@ -2135,5 +2033,126 @@ body, p {
     font-weight: 600;
   }
 }
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  top: var(--spacing-xl);
+  right: var(--spacing-xl);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  pointer-events: none;
+}
+
+.toast {
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  pointer-events: all;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  max-width: 360px;
+  box-shadow: var(--shadow-elevated);
+}
+
+.toast-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-success {
+  background: var(--color-completed);
+}
+
+.toast-error {
+  background: var(--color-error, #e05252);
+}
+
+.toast-info {
+  background: var(--color-to-read);
+}
+
+/* ===== TABLET RESPONSIVE (769px – 1024px) ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dashboard-view {
+    padding: var(--spacing-2xl) var(--spacing-3xl);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  .stat-card {
+    padding: var(--spacing-lg);
+  }
+
+  .books-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+  }
+
+  .bookshelf-nav {
+    flex-wrap: nowrap;
+  }
+
+  .goal-progress-card {
+    padding: var(--spacing-3xl);
+  }
+
+  .progress-ring-container svg {
+    width: 180px;
+    height: 180px;
+  }
+
+  .login-container {
+    flex-direction: row;
+    gap: var(--spacing-4xl);
+    padding: var(--spacing-4xl);
+  }
+
+  .login-hero {
+    flex: 0 0 40%;
+    margin-bottom: 0;
+  }
+
+  .login-form-container {
+    flex: 0 0 55%;
+    max-width: none;
+  }
+
+  .modal-content {
+    max-width: 550px;
+  }
+
+  .fab-container {
+    left: auto;
+    right: var(--spacing-3xl);
+    bottom: calc(var(--spacing-3xl) + env(safe-area-inset-bottom));
+    width: auto;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--spacing-lg);
+  }
+}
+
+/* ===== IPHONE SAFE AREA FIXES ===== */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .fab-container {
+    bottom: calc(var(--spacing-xl) + env(safe-area-inset-bottom));
+  }
+
+  .modal-overlay {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .bookshelf-view {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+  }
 }
 

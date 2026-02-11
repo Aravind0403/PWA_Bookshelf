@@ -18,15 +18,15 @@ import { db, auth } from './firebase';
 import { Book, ReadingGoal, User, CurrentUser } from './types';
 
 // Helper to convert Firestore dates to JS Dates
-const convertDates = (data: any): any => {
+const convertDates = <T extends Record<string, unknown>>(data: T): T => {
   if (!data) return data;
-  const converted = { ...data };
+  const converted = { ...data } as Record<string, unknown>;
   for (const key in converted) {
     if (converted[key] instanceof Timestamp) {
-      converted[key] = converted[key].toDate();
+      converted[key] = (converted[key] as Timestamp).toDate();
     }
   }
-  return converted;
+  return converted as T;
 };
 
 // User management

@@ -161,13 +161,14 @@ export class LoginView {
         await loginUser(email, password);
         // Auth state listener in App will handle navigation
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       let message = 'An error occurred.';
-      if (error.code === 'auth/email-already-in-use') {
+      const firebaseError = error as { code?: string };
+      if (firebaseError.code === 'auth/email-already-in-use') {
         message = 'An account with this email already exists.';
-      } else if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+      } else if (firebaseError.code === 'auth/wrong-password' || firebaseError.code === 'auth/user-not-found' || firebaseError.code === 'auth/invalid-credential') {
         message = 'Invalid email or password.';
-      } else if (error.code === 'auth/weak-password') {
+      } else if (firebaseError.code === 'auth/weak-password') {
         message = 'Password should be at least 6 characters.';
       }
 
@@ -184,6 +185,10 @@ export class LoginView {
     setTimeout(() => {
       element.style.animation = 'slideDown 0.3s ease';
     }, 10);
+  }
+
+  destroy() {
+    // No timers or listeners to clean up
   }
 
   private createFloatingBooks(container: HTMLElement) {

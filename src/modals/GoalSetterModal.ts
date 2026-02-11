@@ -1,5 +1,6 @@
 import { ReadingGoal } from '../types';
 import { setReadingGoal, getCurrentUser } from '../storage';
+import { showToast, trapFocus } from '../utils';
 
 export class GoalSetterModal {
   private overlay: HTMLElement | null = null;
@@ -23,10 +24,11 @@ export class GoalSetterModal {
     const popularGoals = [12, 24, 36, 52];
     
     return `
-      <div class="modal-content goal-setter-modal">
+      <div class="modal-content goal-setter-modal" role="dialog" aria-modal="true" aria-label="Set Your Reading Goal">
         <button class="modal-close" id="closeBtn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18 6L6 18M6 6l12 12"/>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
         </button>
 
@@ -88,6 +90,15 @@ export class GoalSetterModal {
       }
     });
 
+    // Escape key & focus trap
+    const escapeHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { this.close(); onClose?.(); }
+    };
+    document.addEventListener('keydown', escapeHandler);
+    const removeTrap = trapFocus(this.overlay);
+    const origClose = this.close.bind(this);
+    this.close = () => { document.removeEventListener('keydown', escapeHandler); removeTrap(); origClose(); };
+
     const quickGoalBtns = this.overlay.querySelectorAll('.quick-goal-btn');
     const customGoalInput = this.overlay.querySelector('#customGoalInput') as HTMLInputElement;
     const saveGoalBtn = this.overlay.querySelector('#saveGoalBtn') as HTMLButtonElement;
@@ -139,7 +150,7 @@ export class GoalSetterModal {
       this.close();
       onClose?.();
     } catch (error) {
-      console.error('Failed to save goal:', error);
+      showToast('Failed to save goal. Please try again.', 'error');
     }
   }
 

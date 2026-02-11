@@ -18,17 +18,19 @@ const fallbackFacts = [
 
 export async function getRandomFunFact(): Promise<string> {
   try {
-    // Try to fetch from API first
-    const response = await fetch('http://numbersapi.com/random/trivia');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const response = await fetch('https://numbersapi.com/random/trivia', {
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
     if (response.ok) {
       const fact = await response.text();
-      // Prefix with book-related intro
-      return `Did you know? ${fact}`;
+      return fact;
     }
-  } catch (error) {
-    console.log('API fetch failed, using fallback facts');
+  } catch {
+    // API unavailable — use local facts
   }
-  
-  // Fallback to local facts
+
   return fallbackFacts[Math.floor(Math.random() * fallbackFacts.length)];
 }

@@ -5,6 +5,8 @@ import { BookDetailModal } from '../modals/BookDetailModal';
 import { ManualAddModal } from '../modals/ManualAddModal';
 import { ISBNScannerModal } from '../modals/ISBNScannerModal';
 import { app } from '../app';
+import { escapeHTML, showToast } from '../utils';
+import { icon } from '../icons';
 
 export class BookshelfView {
   private books: Book[] = [];
@@ -57,8 +59,12 @@ export class BookshelfView {
 
         <div class="fab-container">
           <button class="fab fab-scan" id="scanBtn" title="Scan ISBN">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2m0 6v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2m0-6V7a2 2 0 0 1 2-2h2"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+              <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+              <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+              <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+              <line x1="7" y1="12" x2="17" y2="12"/>
             </svg>
           </button>
           <button class="fab fab-add" id="addBtn" title="Add Book">
@@ -112,7 +118,7 @@ export class BookshelfView {
         });
 
         // Long press / right click for delete
-        let longPressTimer: NodeJS.Timeout;
+        let longPressTimer: ReturnType<typeof setTimeout>;
         card.addEventListener('mousedown', () => {
           longPressTimer = setTimeout(() => {
             this.showDeleteConfirm(bookId);
@@ -144,8 +150,15 @@ export class BookshelfView {
     return `
       <div class="book-card" data-book-id="${book.id}">
         <div class="book-cover-container">
-          ${book.coverImage ? 
-            `<img src="${book.coverImage}" alt="${book.title}" class="book-cover">` :
+          ${book.coverImage ?
+            `<img src="${book.coverImage}" alt="${escapeHTML(book.title)}" class="book-cover"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            <div class="book-cover-placeholder" style="display:none;">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20"/>
+                <path d="M6.5 2H20V20H6.5C5.837 20 5.201 19.737 4.732 19.268C4.263 18.799 4 18.163 4 17.5V4.5C4 3.837 4.263 3.201 4.732 2.732C5.201 2.263 5.837 2 6.5 2Z"/>
+              </svg>
+            </div>` :
             `<div class="book-cover-placeholder">
               <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20"/>
@@ -153,11 +166,11 @@ export class BookshelfView {
               </svg>
             </div>`
           }
-          <div class="book-status-badge" style="background-color: ${statusColor}"></div>
         </div>
         <div class="book-info">
-          <h3 class="book-title">${book.title}</h3>
-          <p class="book-author">${book.author}</p>
+          <h3 class="book-title">${escapeHTML(book.title)}</h3>
+          <p class="book-author">${escapeHTML(book.author)}</p>
+          <span class="book-status-pill" style="background-color: ${statusColor}">${book.status}</span>
         </div>
       </div>
     `;
@@ -196,6 +209,10 @@ export class BookshelfView {
         this.refreshBooks(container);
       });
     });
+  }
+
+  destroy() {
+    // No timers to clean up
   }
 
   private async refreshBooks(container: HTMLElement) {
@@ -237,7 +254,7 @@ export class BookshelfView {
         await this.refreshBooks(container as HTMLElement);
       }
     } catch (error) {
-      alert('Error deleting book. Please try again.');
+      showToast('Error deleting book. Please try again.', 'error');
     }
   }
 }
