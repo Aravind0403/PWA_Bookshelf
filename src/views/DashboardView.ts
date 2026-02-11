@@ -101,7 +101,10 @@ export class DashboardView {
 
   private async getGoalProgressHTML(stats: ReadingStats): Promise<string> {
     const progressPercentage = Math.min(100, stats.progressPercentage);
-    const circumference = 2 * Math.PI * 90;
+    const ringRadius = 90;
+    const ringCenter = 100;
+    const ringStroke = 12;
+    const circumference = 2 * Math.PI * ringRadius;
     const dashOffset = circumference - (progressPercentage / 100) * circumference;
 
     return `
@@ -115,21 +118,21 @@ export class DashboardView {
 
       <div class="goal-progress-card">
         <div class="progress-ring-container">
-          <svg class="progress-ring" width="200" height="200">
+          <svg class="progress-ring" viewBox="0 0 200 200" aria-label="Goal progress">
             <circle
-              cx="100"
-              cy="100"
-              r="90"
+              cx="${ringCenter}"
+              cy="${ringCenter}"
+              r="${ringRadius}"
               stroke="rgba(230, 204, 128, 0.2)"
-              stroke-width="12"
+              stroke-width="${ringStroke}"
               fill="none"
             />
             <circle
-              cx="100"
-              cy="100"
-              r="90"
+              cx="${ringCenter}"
+              cy="${ringCenter}"
+              r="${ringRadius}"
               stroke="url(#gradient)"
-              stroke-width="12"
+              stroke-width="${ringStroke}"
               fill="none"
               stroke-dasharray="${circumference}"
               stroke-dashoffset="${dashOffset}"
