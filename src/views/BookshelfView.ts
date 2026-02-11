@@ -6,7 +6,7 @@ import { ManualAddModal } from '../modals/ManualAddModal';
 import { ISBNScannerModal } from '../modals/ISBNScannerModal';
 import { app } from '../app';
 import { escapeHTML, showToast } from '../utils';
-import { icon } from '../icons';
+//import { icon } from '../icons';
 
 export class BookshelfView {
   private books: Book[] = [];
