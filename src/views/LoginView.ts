@@ -1,5 +1,5 @@
 import { createUser, loginUser } from '../storage';
-
+import { icon } from '../icons';
 
 export class LoginView {
   private isSignUp = false;
@@ -20,25 +20,13 @@ export class LoginView {
       <div class="login-container">
         <div class="login-hero">
           <div class="book-icon-container">
-            <svg class="book-icon" width="70" height="70" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20" stroke="url(#goldGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M6.5 2H20V20H6.5C5.837 20 5.201 19.737 4.732 19.268C4.263 18.799 4 18.163 4 17.5V4.5C4 3.837 4.263 3.201 4.732 2.732C5.201 2.263 5.837 2 6.5 2Z" stroke="url(#goldGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <defs>
-                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#E6CC80;stop-opacity:1" />
-                  <stop offset="100%" style="stop-color:#CC9959;stop-opacity:1" />
-                </linearGradient>
-              </defs>
-            </svg>
+            ${icon('book', { size: 70, class: 'book-icon', strokeWidth: 2 })}
           </div>
           <h1 class="login-title text-gradient">My Bookshelf</h1>
           <p class="login-subtitle" id="subtitle">Welcome Back, Reader</p>
           <div class="decorative-divider">
             <div class="divider-line"></div>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-              <path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20" stroke="currentColor" stroke-width="2"/>
-              <path d="M6.5 2H20V20H6.5C5.837 20 5.201 19.737 4.732 19.268C4.263 18.799 4 18.163 4 17.5V4.5C4 3.837 4.263 3.201 4.732 2.732C5.201 2.263 5.837 2 6.5 2Z" stroke="currentColor" stroke-width="2"/>
-            </svg>
+            ${icon('book', { size: 40, strokeWidth: 2 })}
             <div class="divider-line"></div>
           </div>
         </div>
@@ -52,10 +40,7 @@ export class LoginView {
           <form class="login-form" id="loginForm">
             <div class="form-group">
               <label class="form-label">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                  <polyline points="22,6 12,13 2,6"/>
-                </svg>
+                ${icon('mail', { size: 16, strokeWidth: 2 })}
                 Email Address
               </label>
               <input type="email" class="input" id="email" required placeholder="your.email@example.com">
@@ -63,10 +48,7 @@ export class LoginView {
 
             <div class="form-group">
               <label class="form-label">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
+                ${icon('lock', { size: 16, strokeWidth: 2 })}
                 Password
               </label>
               <input type="password" class="input" id="password" required placeholder="••••••••">
@@ -74,10 +56,7 @@ export class LoginView {
 
             <div class="form-group ${this.isSignUp ? '' : 'hidden'}" id="confirmPasswordGroup">
               <label class="form-label">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
+                ${icon('lock', { size: 16, strokeWidth: 2 })}
                 Confirm Password
               </label>
               <input type="password" class="input" id="confirmPassword" placeholder="••••••••">
@@ -208,4 +187,3 @@ export class LoginView {
     }
   }
 }
-

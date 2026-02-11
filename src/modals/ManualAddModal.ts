@@ -2,6 +2,7 @@ import { getCurrentUser } from '../storage';
 import { addBook } from '../storage';
 import { ReadingStatus } from '../types';
 import { trapFocus } from '../utils';
+import { icon } from '../icons';
 
 export class ManualAddModal {
   private overlay: HTMLElement | null = null;
@@ -24,10 +25,7 @@ export class ManualAddModal {
     return `
       <div class="modal-content manual-add-modal" role="dialog" aria-modal="true" aria-label="Add Book Manually">
         <button class="modal-close" id="cancelBtn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
+          ${icon('close', { size: 24, strokeWidth: 2 })}
         </button>
         
         <div class="modal-header">
@@ -50,10 +48,7 @@ export class ManualAddModal {
           <h3>Cover Image (Optional)</h3>
           <div class="image-preview-container" id="imagePreview">
             <div class="image-placeholder">
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20"/>
-                <path d="M6.5 2H20V20H6.5C5.837 20 5.201 19.737 4.732 19.268C4.263 18.799 4 18.163 4 17.5V4.5C4 3.837 4.263 3.201 4.732 2.732C5.201 2.263 5.837 2 6.5 2Z"/>
-              </svg>
+              ${icon('book', { size: 60, strokeWidth: 2 })}
             </div>
           </div>
           <button type="button" class="btn btn-secondary btn-full" id="chooseImageBtn">Choose Image</button>

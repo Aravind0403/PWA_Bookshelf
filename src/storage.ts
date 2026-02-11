@@ -8,6 +8,9 @@ import {
   getDoc,
   setDoc,
   Timestamp,
+  query,
+  where,
+  limit,
 } from 'firebase/firestore';
 import {
   createUserWithEmailAndPassword,
@@ -130,6 +133,13 @@ export async function getBookById(bookId: string): Promise<Book | undefined> {
     return { id: docSnap.id, ...convertDates(docSnap.data()) } as Book;
   }
   return undefined;
+}
+
+export async function bookExistsByISBN(userID: string, isbn13: string): Promise<boolean> {
+  const booksRef = collection(db, 'users', userID, 'books');
+  const q = query(booksRef, where('isbn', '==', isbn13), limit(1));
+  const snapshot = await getDocs(q);
+  return !snapshot.empty;
 }
 
 // Reading goals

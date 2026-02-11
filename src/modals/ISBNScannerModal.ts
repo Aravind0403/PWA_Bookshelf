@@ -1,9 +1,10 @@
 import { getCurrentUser } from '../storage';
-import { addBook, getBooks } from '../storage';
-import { fetchBookByISBN, validateISBN, getErrorMessage } from '../api';
+import { addBook, bookExistsByISBN, getBooks } from '../storage';
+import { fetchBookByISBN, validateISBN, getErrorMessage, toISBN13 } from '../api';
 import { ReadingStatus } from '../types';
 import { trapFocus } from '../utils';
 import { BrowserMultiFormatReader } from '@zxing/library';
+import { icon } from '../icons';
 
 export class ISBNScannerModal {
   private overlay: HTMLElement | null = null;
@@ -29,16 +30,11 @@ export class ISBNScannerModal {
     return `
       <div class="modal-content isbn-scanner-modal" role="dialog" aria-modal="true" aria-label="Scan or Enter ISBN">
         <button class="modal-close" id="closeBtn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
+          ${icon('close', { size: 24, strokeWidth: 2 })}
         </button>
 
         <div class="scanner-header">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2m0 6v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2m0-6V7a2 2 0 0 1 2-2h2"/>
-          </svg>
+          ${icon('scan', { size: 64, strokeWidth: 2 })}
           <h2>Scan or Enter ISBN</h2>
           <p>Use camera to scan barcode or enter manually</p>
         </div>
@@ -54,10 +50,7 @@ export class ISBNScannerModal {
           </div>
 
           <button class="btn btn-primary btn-full" id="searchBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
-            </svg>
+            ${icon('search', { size: 20, strokeWidth: 2 })}
             Search Book
           </button>
         </div>
@@ -295,13 +288,20 @@ export class ISBNScannerModal {
         return;
       }
 
-      const existingBooks = await getBooks(currentUser.id);
-      const duplicate = existingBooks.find(b => 
-        b.title.toLowerCase() === bookData.title.toLowerCase() &&
-        b.author.toLowerCase() === bookData.author.toLowerCase()
-      );
+      const canonicalISBN = toISBN13(isbn);
+      const duplicateByIsbn = await bookExistsByISBN(currentUser.id, canonicalISBN);
+      let duplicate = duplicateByIsbn;
 
-      if (duplicate) {
+      if (!duplicate) {
+        // Fallback for legacy records that might not have ISBN yet.
+        const existingBooks = await getBooks(currentUser.id);
+        duplicate = existingBooks.some(b =>
+          b.title.toLowerCase() === bookData.title.toLowerCase() &&
+          b.author.toLowerCase() === bookData.author.toLowerCase()
+        );
+      }
+
+      if (duplicate === true) {
         this.showError(errorMessage, 'This book is already in your shelf!');
         this.isLoading = false;
         loadingOverlay?.classList.add('hidden');
@@ -315,7 +315,7 @@ export class ISBNScannerModal {
         author: bookData.author,
         coverImage: bookData.coverImage,
         status: ReadingStatus.TO_READ,
-        isbn: isbn.replace(/[-\s]/g, ''),
+        isbn: canonicalISBN,
       });
 
       this.close();

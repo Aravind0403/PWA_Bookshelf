@@ -2,6 +2,7 @@ import { Book, ReadingStatus } from '../types';
 import { updateBook, deleteBook } from '../storage';
 import { escapeHTML, showToast, trapFocus } from '../utils';
 import confetti from 'canvas-confetti';
+import { icon } from '../icons';
 
 export class BookDetailModal {
   private overlay: HTMLElement | null = null;
@@ -27,10 +28,7 @@ export class BookDetailModal {
     return `
       <div class="modal-content book-detail-modal" role="dialog" aria-modal="true" aria-label="Book Details">
         <button class="modal-close" id="closeBtn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
+          ${icon('close', { size: 24, strokeWidth: 2 })}
         </button>
 
         <div class="book-detail-header">
@@ -41,10 +39,7 @@ export class BookDetailModal {
           ${book.coverImage ?
             `<img src="${book.coverImage}" alt="${escapeHTML(book.title)}">` :
             `<div class="book-cover-placeholder-large">
-              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20"/>
-                <path d="M6.5 2H20V20H6.5C5.837 20 5.201 19.737 4.732 19.268C4.263 18.799 4 18.163 4 17.5V4.5C4 3.837 4.263 3.201 4.732 2.732C5.201 2.263 5.837 2 6.5 2Z"/>
-              </svg>
+              ${icon('book', { size: 80, strokeWidth: 2 })}
             </div>`
           }
         </div>
@@ -60,15 +55,10 @@ export class BookDetailModal {
             ${Object.values(ReadingStatus).map(status => `
               <button class="status-btn ${book.status === status ? 'selected' : ''}" 
                 data-status="${status}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  ${this.getStatusIcon(status)}
-                </svg>
+                ${this.getStatusIcon(status)}
                 <span>${status}</span>
                 ${book.status === status ? `
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <polyline points="22 4 12 14.01 9 11.01"/>
-                  </svg>
+                  ${icon('checkmark', { size: 20, strokeWidth: 2 })}
                 ` : ''}
               </button>
             `).join('')}
@@ -76,10 +66,7 @@ export class BookDetailModal {
         </div>
 
         <button class="btn btn-secondary btn-full delete-btn" id="deleteBtn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
+          ${icon('trash', { size: 20, strokeWidth: 2 })}
           Remove Book
         </button>
       </div>
@@ -89,11 +76,11 @@ export class BookDetailModal {
   private getStatusIcon(status: ReadingStatus): string {
     switch (status) {
       case ReadingStatus.TO_READ:
-        return '<path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20"/><path d="M6.5 2H20V20H6.5C5.837 20 5.201 19.737 4.732 19.268C4.263 18.799 4 18.163 4 17.5V4.5C4 3.837 4.263 3.201 4.732 2.732C5.201 2.263 5.837 2 6.5 2Z"/>';
+        return icon('book', { size: 20, strokeWidth: 2 });
       case ReadingStatus.READING:
-        return '<path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20"/><path d="M6.5 2H20V20H6.5C5.837 20 5.201 19.737 4.732 19.268C4.263 18.799 4 18.163 4 17.5V4.5C4 3.837 4.263 3.201 4.732 2.732C5.201 2.263 5.837 2 6.5 2Z"/><line x1="12" y1="6" x2="12" y2="18"/>';
+        return icon('bookReading', { size: 20, strokeWidth: 2 });
       case ReadingStatus.COMPLETED:
-        return '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
+        return icon('checkmark', { size: 20, strokeWidth: 2 });
     }
   }
 

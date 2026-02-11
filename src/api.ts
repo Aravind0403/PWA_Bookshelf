@@ -4,80 +4,143 @@ interface BookResult {
   coverImage: string;
 }
 
-async function fetchFromOpenLibrary(cleanISBN: string): Promise<BookResult | null> {
-  const response = await fetch(`https://openlibrary.org/isbn/${cleanISBN}.json`);
+interface OpenLibraryAuthor {
+  name?: string;
+}
+
+interface OpenLibraryCover {
+  medium?: string;
+  large?: string;
+}
+
+interface OpenLibraryBookEntry {
+  title?: string;
+  authors?: OpenLibraryAuthor[];
+  cover?: OpenLibraryCover;
+}
+
+type OpenLibraryResponse = Record<string, OpenLibraryBookEntry>;
+
+interface GoogleBooksResponse {
+  items?: Array<{
+    volumeInfo?: {
+      title?: string;
+      authors?: string[];
+      imageLinks?: {
+        thumbnail?: string;
+        smallThumbnail?: string;
+      };
+    };
+  }>;
+}
+
+async function fetchWithTimeout(url: string, ms = 8000): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchFromOpenLibrary(cleanISBN13: string): Promise<BookResult | null> {
+  const url = `https://openlibrary.org/api/books?bibkeys=ISBN:${cleanISBN13}&format=json&jscmd=data`;
+  const response = await fetchWithTimeout(url);
   if (!response.ok) return null;
 
-  const data = await response.json();
-  const title = data.title || '';
-  if (!title) return null;
+  const data = await response.json() as OpenLibraryResponse;
+  const key = `ISBN:${cleanISBN13}`;
+  const entry = data[key];
+  if (!entry?.title) return null;
 
-  // Resolve author names (Open Library stores author refs)
-  let author = 'Unknown Author';
-  if (data.authors?.length) {
-    try {
-      const authorRes = await fetch(`https://openlibrary.org${data.authors[0].key}.json`);
-      if (authorRes.ok) {
-        const authorData = await authorRes.json();
-        author = authorData.name || author;
-      }
-    } catch {
-      // keep fallback author
-    }
-  }
-
-  // Build cover URL from cover ID or ISBN
-  let coverImage = '';
-  if (data.covers?.length) {
-    coverImage = `https://covers.openlibrary.org/b/id/${data.covers[0]}-M.jpg`;
-  } else {
-    coverImage = `https://covers.openlibrary.org/b/isbn/${cleanISBN}-M.jpg`;
-  }
+  const title = entry.title;
+  const author = entry.authors?.map(a => a.name).filter(Boolean).join(', ') || 'Unknown Author';
+  const coverImage =
+    entry.cover?.medium ||
+    entry.cover?.large ||
+    `https://covers.openlibrary.org/b/isbn/${cleanISBN13}-M.jpg`;
 
   return { title, author, coverImage };
 }
 
-async function fetchFromGoogleBooks(cleanISBN: string): Promise<BookResult | null> {
-  const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${cleanISBN}`);
+async function fetchFromGoogleBooks(cleanISBN13: string): Promise<BookResult | null> {
+  const url = `https://www.googleapis.com/books/v1/volumes?q=isbn:${cleanISBN13}`;
+  const response = await fetchWithTimeout(url);
   if (!response.ok) return null;
 
-  const data = await response.json();
-  if (!data.items || data.items.length === 0) return null;
+  const data = await response.json() as GoogleBooksResponse;
+  const item = data.items?.[0]?.volumeInfo;
+  if (!item?.title) return null;
 
-  const book = data.items[0].volumeInfo;
-  const title = book.title || 'Unknown Title';
-  const author = book.authors ? book.authors.join(', ') : 'Unknown Author';
-  const coverImage = (book.imageLinks?.thumbnail || book.imageLinks?.smallThumbnail || '')
+  const title = item.title;
+  const author = item.authors?.join(', ') || 'Unknown Author';
+  const coverImage = (item.imageLinks?.thumbnail || item.imageLinks?.smallThumbnail || '')
     .replace('http://', 'https://');
 
   return { title, author, coverImage };
 }
 
-export async function fetchBookByISBN(isbn: string): Promise<BookResult | null> {
-  const cleanISBN = isbn.replace(/[-\s]/g, '');
+export function normalizeISBN(isbn: string): string {
+  return isbn.replace(/[-\s]/g, '').toUpperCase();
+}
 
-  try {
-    // Try Open Library first (more reliable for ISBN lookups)
-    const olResult = await fetchFromOpenLibrary(cleanISBN);
-    if (olResult) return olResult;
-  } catch {
-    // Open Library failed, try Google Books
-  }
+function isValidISBN13(isbn13: string): boolean {
+  if (!/^\d{13}$/.test(isbn13)) return false;
+  const digits = isbn13.split('').map(Number);
+  const sum = digits.slice(0, 12).reduce((acc, d, i) => acc + d * (i % 2 === 0 ? 1 : 3), 0);
+  const check = (10 - (sum % 10)) % 10;
+  return check === digits[12];
+}
 
-  try {
-    const gbResult = await fetchFromGoogleBooks(cleanISBN);
-    if (gbResult) return gbResult;
-  } catch {
-    // Both APIs failed
-  }
+function isValidISBN10(isbn10: string): boolean {
+  if (!/^\d{9}[\dX]$/.test(isbn10)) return false;
+  const chars = isbn10.split('');
+  const sum = chars.slice(0, 9).reduce((acc, c, i) => acc + Number(c) * (10 - i), 0);
+  const last = chars[9] === 'X' ? 10 : Number(chars[9]);
+  return (sum + last) % 11 === 0;
+}
 
-  return null;
+function isbn10To13(isbn10: string): string {
+  const core = `978${isbn10.slice(0, 9)}`;
+  const digits = core.split('').map(Number);
+  const sum = digits.reduce((acc, d, i) => acc + d * (i % 2 === 0 ? 1 : 3), 0);
+  const check = (10 - (sum % 10)) % 10;
+  return `${core}${String(check)}`;
+}
+
+export function toISBN13(isbn: string): string {
+  const clean = normalizeISBN(isbn);
+  return clean.length === 10 ? isbn10To13(clean) : clean;
 }
 
 export function validateISBN(isbn: string): boolean {
-  const cleanISBN = isbn.replace(/[-\s]/g, '');
-  // ISBN-13 (all digits) or ISBN-10 (9 digits + digit or X check)
-  return /^(\d{9}[\dXx]|\d{13})$/.test(cleanISBN);
+  const clean = normalizeISBN(isbn);
+  if (clean.length === 13) return isValidISBN13(clean);
+  if (clean.length === 10) return isValidISBN10(clean);
+  return false;
+}
+
+export async function fetchBookByISBN(isbn: string): Promise<BookResult | null> {
+  if (!validateISBN(isbn)) return null;
+
+  const cleanISBN13 = toISBN13(isbn);
+
+  try {
+    const olResult = await fetchFromOpenLibrary(cleanISBN13);
+    if (olResult) return olResult;
+  } catch {
+    // Open Library failed, try Google Books.
+  }
+
+  try {
+    const gbResult = await fetchFromGoogleBooks(cleanISBN13);
+    if (gbResult) return gbResult;
+  } catch {
+    // Google Books failed.
+  }
+
+  return null;
 }
 
 export function getErrorMessage(error: unknown): string {
@@ -89,4 +152,3 @@ export function getErrorMessage(error: unknown): string {
   }
   return 'An unexpected error occurred.';
 }
-

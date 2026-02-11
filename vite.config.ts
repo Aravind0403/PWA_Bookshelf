@@ -4,7 +4,11 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig({
   plugins: [
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
+      injectRegister: false,
       manifest: {
         name: 'My Bookshelf',
         short_name: 'Bookshelf',
@@ -25,9 +29,13 @@ export default defineConfig({
           }
         ]
       },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
-      }
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
     })
   ],
   resolve: {
@@ -36,4 +44,3 @@ export default defineConfig({
     }
   }
 });
-

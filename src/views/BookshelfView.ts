@@ -6,7 +6,7 @@ import { ManualAddModal } from '../modals/ManualAddModal';
 import { ISBNScannerModal } from '../modals/ISBNScannerModal';
 import { app } from '../app';
 import { escapeHTML, showToast } from '../utils';
-//import { icon } from '../icons';
+import { icon } from '../icons';
 
 export class BookshelfView {
   private books: Book[] = [];
@@ -42,9 +42,7 @@ export class BookshelfView {
       <div class="bookshelf-container">
         <nav class="bookshelf-nav">
           <button class="nav-btn" id="backBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
+            ${icon('arrowLeft', { size: 20, strokeWidth: 2 })}
             Dashboard
           </button>
           <h2 class="bookshelf-title">My Book Shelf</h2>
@@ -59,19 +57,10 @@ export class BookshelfView {
 
         <div class="fab-container">
           <button class="fab fab-scan" id="scanBtn" title="Scan ISBN">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
-              <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
-              <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
-              <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
-              <line x1="7" y1="12" x2="17" y2="12"/>
-            </svg>
+            ${icon('scan', { size: 24, strokeWidth: 2 })}
           </button>
           <button class="fab fab-add" id="addBtn" title="Add Book">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
+            ${icon('plus', { size: 24, strokeWidth: 2 })}
           </button>
         </div>
       </div>
@@ -81,10 +70,7 @@ export class BookshelfView {
   private getEmptyState(): string {
     return `
       <div class="empty-state">
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20"/>
-          <path d="M6.5 2H20V20H6.5C5.837 20 5.201 19.737 4.732 19.268C4.263 18.799 4 18.163 4 17.5V4.5C4 3.837 4.263 3.201 4.732 2.732C5.201 2.263 5.837 2 6.5 2Z"/>
-        </svg>
+        ${icon('book', { size: 80, strokeWidth: 2 })}
         <h2>Your Library Awaits</h2>
         <p>Scan or add books to start building your collection</p>
       </div>
@@ -154,16 +140,10 @@ export class BookshelfView {
             `<img src="${book.coverImage}" alt="${escapeHTML(book.title)}" class="book-cover"
               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
             <div class="book-cover-placeholder" style="display:none;">
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20"/>
-                <path d="M6.5 2H20V20H6.5C5.837 20 5.201 19.737 4.732 19.268C4.263 18.799 4 18.163 4 17.5V4.5C4 3.837 4.263 3.201 4.732 2.732C5.201 2.263 5.837 2 6.5 2Z"/>
-              </svg>
+              ${icon('book', { size: 60, strokeWidth: 2 })}
             </div>` :
             `<div class="book-cover-placeholder">
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M4 19.5C4 18.837 4.263 18.201 4.732 17.732C5.201 17.263 5.837 17 6.5 17H20"/>
-                <path d="M6.5 2H20V20H6.5C5.837 20 5.201 19.737 4.732 19.268C4.263 18.799 4 18.163 4 17.5V4.5C4 3.837 4.263 3.201 4.732 2.732C5.201 2.263 5.837 2 6.5 2Z"/>
-              </svg>
+              ${icon('book', { size: 60, strokeWidth: 2 })}
             </div>`
           }
         </div>
@@ -258,4 +238,3 @@ export class BookshelfView {
     }
   }
 }
-

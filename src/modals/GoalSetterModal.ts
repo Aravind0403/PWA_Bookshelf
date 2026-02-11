@@ -1,6 +1,7 @@
 import { ReadingGoal } from '../types';
 import { setReadingGoal, getCurrentUser } from '../storage';
 import { showToast, trapFocus } from '../utils';
+import { icon } from '../icons';
 
 export class GoalSetterModal {
   private overlay: HTMLElement | null = null;
@@ -26,16 +27,11 @@ export class GoalSetterModal {
     return `
       <div class="modal-content goal-setter-modal" role="dialog" aria-modal="true" aria-label="Set Your Reading Goal">
         <button class="modal-close" id="closeBtn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
+          ${icon('close', { size: 24, strokeWidth: 2 })}
         </button>
 
         <div class="goal-setter-header">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-          </svg>
+          ${icon('star', { size: 64, strokeWidth: 2 })}
           <h2>Set Your Reading Goal</h2>
           <p>How many books do you want to read this year?</p>
         </div>
