@@ -49,26 +49,41 @@ export class App {
     const currentUser = getCurrentUser();
     app.innerHTML = '';
 
-    // Render appropriate view
-    if (!currentUser || !currentUser.isLoggedIn) {
-      const view = new LoginView();
-      this.currentView = view.render();
-      this.currentViewInstance = view;
-      app.appendChild(this.currentView);
-    } else {
-      const path = window.location.pathname;
-      if (path === '/bookshelf' || path === '/bookshelf/') {
-        const view = new BookshelfView();
-        this.currentView = await view.render();
-        if (generation !== this.renderGeneration) return; // stale render
+    try {
+      // Render appropriate view
+      if (!currentUser || !currentUser.isLoggedIn) {
+        const view = new LoginView();
+        this.currentView = view.render();
         this.currentViewInstance = view;
+        app.appendChild(this.currentView);
       } else {
-        const view = new DashboardView();
-        this.currentView = await view.render();
-        if (generation !== this.renderGeneration) return; // stale render
-        this.currentViewInstance = view;
+        const path = window.location.pathname;
+        if (path === '/bookshelf' || path === '/bookshelf/') {
+          const view = new BookshelfView();
+          this.currentView = await view.render();
+          if (generation !== this.renderGeneration) return; // stale render
+          this.currentViewInstance = view;
+        } else {
+          const view = new DashboardView();
+          this.currentView = await view.render();
+          if (generation !== this.renderGeneration) return; // stale render
+          this.currentViewInstance = view;
+        }
+        app.appendChild(this.currentView);
       }
-      app.appendChild(this.currentView);
+    } catch (error) {
+      console.error('[App] Render failed:', error);
+      app.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                    min-height:100vh;padding:40px;text-align:center;color:#d9bf8c;">
+          <p style="font-size:18px;margin-bottom:20px;">Something went wrong loading the app.</p>
+          <button onclick="window.location.reload()"
+                  style="padding:10px 28px;border:1px solid #d9bf8c;border-radius:8px;
+                         background:transparent;color:#d9bf8c;font-size:15px;cursor:pointer;">
+            Refresh
+          </button>
+        </div>
+      `;
     }
   }
 

@@ -3,8 +3,9 @@ import { addBook, bookExistsByISBN, getBooks } from '../storage';
 import { fetchBookByISBN, validateISBN, getErrorMessage, toISBN13 } from '../api';
 import { ReadingStatus } from '../types';
 import { trapFocus } from '../utils';
-import { BrowserMultiFormatReader } from '@zxing/library';
+import type { BrowserMultiFormatReader } from '@zxing/library'; // type-only: erased at build, not bundled
 import { icon } from '../icons';
+import { ManualAddModal } from './ManualAddModal';
 
 export class ISBNScannerModal {
   private overlay: HTMLElement | null = null;
@@ -167,43 +168,49 @@ export class ISBNScannerModal {
   }
 
   private async startCameraScanning() {
-  if (this.isScanning) return;
+    if (this.isScanning) return;
 
-  const readerDiv = this.overlay?.querySelector('#reader');
-  if (!readerDiv) return;
+    const readerDiv = this.overlay?.querySelector('#reader');
+    if (!readerDiv) return;
 
-  this.isScanning = true;
-  this.codeReader = new BrowserMultiFormatReader();
+    this.isScanning = true;
 
-  try {
-    // Create video element
-    const videoElement = document.createElement('video');
-    videoElement.style.width = '100%';
-    videoElement.style.height = 'auto';
-    videoElement.style.maxHeight = '400px';
-    videoElement.setAttribute('playsinline', 'true');
-    readerDiv.appendChild(videoElement);
+    // Show initialising state while the @zxing chunk loads over the network
+    readerDiv.innerHTML = `<p style="padding:20px;text-align:center;color:var(--color-gold);">Initialising camera…</p>`;
 
-    // Start continuous decoding
-    this.codeReader.decodeFromVideoDevice(
-      null, // Use default back camera (changed from undefined)
-      videoElement,
-      (result) => {
-        if (result) {
-          const code = result.getText();
-          console.log('Barcode detected:', code);
-          this.stopCameraScanning();
-          this.processScannedISBN(code);
+    try {
+      // Dynamic import: @zxing (~400 KB) is only downloaded when the user
+      // explicitly taps "Camera Scan" — keeps the initial bundle lean.
+      const { BrowserMultiFormatReader } = await import('@zxing/library');
+      this.codeReader = new BrowserMultiFormatReader();
+
+      readerDiv.innerHTML = ''; // clear loading text
+
+      const videoElement = document.createElement('video');
+      videoElement.style.width = '100%';
+      videoElement.style.height = 'auto';
+      videoElement.style.maxHeight = '400px';
+      videoElement.setAttribute('playsinline', 'true');
+      readerDiv.appendChild(videoElement);
+
+      this.codeReader.decodeFromVideoDevice(
+        null,
+        videoElement,
+        (result) => {
+          if (result) {
+            const code = result.getText();
+            this.stopCameraScanning();
+            this.processScannedISBN(code);
+          }
         }
-      }
-    );
-  } catch (err) {
-    console.error('Camera error:', err);
-    const errorMessage = this.overlay?.querySelector('#errorMessage') as HTMLElement;
-    this.showError(errorMessage, 'Camera access denied or not available.');
-    this.isScanning = false;
+      );
+    } catch (err) {
+      console.error('Camera error:', err);
+      const errorMessage = this.overlay?.querySelector('#errorMessage') as HTMLElement;
+      this.showError(errorMessage, 'Camera access denied or not available.');
+      this.isScanning = false;
+    }
   }
-}
   private async stopCameraScanning() {
     if (this.codeReader && this.isScanning) {
       this.codeReader.reset();
@@ -272,7 +279,19 @@ export class ISBNScannerModal {
       const bookData = await fetchBookByISBN(isbn);
       
       if (!bookData) {
-        this.showError(errorMessage, 'Book not found. Try manual entry?');
+        // Show error + an inline "Add Manually" escape hatch so the user
+        // is never stuck when the Google Books API doesn't have the title.
+        errorMessage.innerHTML = `
+          ISBN not found in Google Books.
+          <button class="btn-link" id="addManuallyBtn">Add it manually instead →</button>
+        `;
+        errorMessage.classList.remove('hidden');
+
+        errorMessage.querySelector('#addManuallyBtn')?.addEventListener('click', () => {
+          this.close();
+          new ManualAddModal().show(onClose);
+        });
+
         this.isLoading = false;
         loadingOverlay?.classList.add('hidden');
         searchBtn.disabled = false;

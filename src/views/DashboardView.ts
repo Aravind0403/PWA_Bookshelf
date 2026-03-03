@@ -15,22 +15,41 @@ export class DashboardView {
   async render(): Promise<HTMLElement> {
     const container = document.createElement('div');
     container.className = 'dashboard-view';
-    
+
     const currentUser = getCurrentUser();
     if (!currentUser) {
       app.navigate('/');
       return container;
     }
 
-    this.books = await getBooks(currentUser.id);
-    this.goal = await getReadingGoal(currentUser.id);
+    try {
+      this.books = await getBooks(currentUser.id);
+      this.goal = await getReadingGoal(currentUser.id);
+      container.innerHTML = await this.getHTML();
+      this.attachEventListeners(container);
+      this.startFunFactRotation(container);
+    } catch (error) {
+      console.error('[Dashboard] Failed to load:', error);
+      container.innerHTML = this.getErrorHTML();
+      container.querySelector('#retryBtn')
+        ?.addEventListener('click', () => app.navigate('/dashboard'));
+    }
 
-    container.innerHTML = await this.getHTML();
-    
-    this.attachEventListeners(container);
-    this.startFunFactRotation(container);
-    
     return container;
+  }
+
+  private getErrorHTML(): string {
+    return `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                  min-height:60vh;padding:40px;text-align:center;color:#d9bf8c;">
+        <p style="font-size:18px;margin-bottom:20px;">Couldn't load your dashboard.</p>
+        <button id="retryBtn"
+                style="padding:10px 28px;border:1px solid #d9bf8c;border-radius:8px;
+                       background:transparent;color:#d9bf8c;font-size:15px;cursor:pointer;">
+          Try Again
+        </button>
+      </div>
+    `;
   }
 
   private async getHTML(): Promise<string> {

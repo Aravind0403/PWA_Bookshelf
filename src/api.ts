@@ -1,7 +1,7 @@
 interface BookResult {
   title: string;
   author: string;
-  coverImage: string;
+  coverImage?: string; // absent when neither API has a real cover
 }
 
 interface OpenLibraryAuthor {
@@ -56,10 +56,10 @@ async function fetchFromOpenLibrary(cleanISBN13: string): Promise<BookResult | n
 
   const title = entry.title;
   const author = entry.authors?.map(a => a.name).filter(Boolean).join(', ') || 'Unknown Author';
-  const coverImage =
-    entry.cover?.medium ||
-    entry.cover?.large ||
-    `https://covers.openlibrary.org/b/isbn/${cleanISBN13}-M.jpg`;
+  // Only store a cover URL when the API actually returned one.
+  // The fallback construct URL always resolves (returns a placeholder image)
+  // so onerror never fires, hiding the generated letter cover behind a dark placeholder.
+  const coverImage = entry.cover?.medium || entry.cover?.large || undefined;
 
   return { title, author, coverImage };
 }
@@ -75,8 +75,8 @@ async function fetchFromGoogleBooks(cleanISBN13: string): Promise<BookResult | n
 
   const title = item.title;
   const author = item.authors?.join(', ') || 'Unknown Author';
-  const coverImage = (item.imageLinks?.thumbnail || item.imageLinks?.smallThumbnail || '')
-    .replace('http://', 'https://');
+  const coverImage = (item.imageLinks?.thumbnail || item.imageLinks?.smallThumbnail)
+    ?.replace('http://', 'https://') || undefined;
 
   return { title, author, coverImage };
 }

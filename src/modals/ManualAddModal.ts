@@ -1,7 +1,7 @@
 import { getCurrentUser } from '../storage';
 import { addBook } from '../storage';
 import { ReadingStatus } from '../types';
-import { trapFocus } from '../utils';
+import { trapFocus, compressImage, UnsupportedImageFormatError } from '../utils';
 import { icon } from '../icons';
 
 export class ManualAddModal {
@@ -118,34 +118,39 @@ export class ManualAddModal {
     });
   }
 
-  private previewImage(file: File) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const preview = this.overlay?.querySelector('#imagePreview');
-      if (preview && e.target?.result) {
-        preview.innerHTML = `<img src="${e.target.result}" alt="Book cover" class="image-preview">`;
-      }
-    };
-    reader.readAsDataURL(file);
+  private async previewImage(file: File) {
+    const preview = this.overlay?.querySelector('#imagePreview');
+    if (!preview) return;
+
+    preview.innerHTML = `<p style="padding:10px;text-align:center;color:var(--color-gold);font-size:13px;">Compressing…</p>`;
+
+    try {
+      const compressed = await compressImage(file);
+      preview.innerHTML = `<img src="${compressed}" alt="Book cover" class="image-preview">`;
+    } catch (err) {
+      const msg = err instanceof UnsupportedImageFormatError
+        ? err.message
+        : 'Could not load image.';
+      preview.innerHTML = `<p style="padding:10px;text-align:center;color:#e07070;font-size:13px;">${msg}</p>`;
+    }
   }
 
   private async saveBook(onClose?: () => void) {
     if (!this.overlay) return;
 
-    const titleInput = this.overlay.querySelector('#titleInput') as HTMLInputElement;
-    const authorInput = this.overlay.querySelector('#authorInput') as HTMLInputElement;
-    const imagePreview = this.overlay.querySelector('#imagePreview img') as HTMLImageElement;
-    const errorMessage = this.overlay.querySelector('#errorMessage') as HTMLElement;
+    const titleInput    = this.overlay.querySelector('#titleInput')    as HTMLInputElement;
+    const authorInput   = this.overlay.querySelector('#authorInput')   as HTMLInputElement;
+    const imagePreview  = this.overlay.querySelector('#imagePreview img') as HTMLImageElement | null;
+    const errorMessage  = this.overlay.querySelector('#errorMessage')  as HTMLElement;
 
-    const title = titleInput.value.trim();
+    const title  = titleInput.value.trim();
     const author = authorInput.value.trim();
-    const coverImage = imagePreview?.src || '';
+    // Only store coverImage when the user actually chose one
+    const coverImage = imagePreview?.src || undefined;
 
     if (!title || !author) {
-      if (errorMessage) {
-        errorMessage.textContent = 'Please fill in all required fields.';
-        errorMessage.classList.remove('hidden');
-      }
+      errorMessage.textContent = 'Please fill in all required fields.';
+      errorMessage.classList.remove('hidden');
       return;
     }
 
@@ -156,17 +161,15 @@ export class ManualAddModal {
       await addBook(currentUser.id, {
         title,
         author,
-        coverImage,
+        ...(coverImage ? { coverImage } : {}),
         status: ReadingStatus.TO_READ,
       });
 
       this.close();
       onClose?.();
     } catch (error) {
-      if (errorMessage) {
-        errorMessage.textContent = 'Error adding book. Please try again.';
-        errorMessage.classList.remove('hidden');
-      }
+      errorMessage.textContent = 'Error adding book. Please try again.';
+      errorMessage.classList.remove('hidden');
     }
   }
 

@@ -825,15 +825,28 @@ body, p {
 
 .bookshelf-nav {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-3xl);
-  flex-wrap: wrap;
+}
+
+/* Top row: [← Dashboard]  [My Book Shelf]  [↓] */
+.nav-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
 }
 
 .bookshelf-title {
   flex: 1;
+  text-align: center;
   font-size: clamp(24px, 3vw, 32px);
+}
+
+/* Icon-only nav button (no label) */
+.nav-btn-icon {
+  padding: var(--spacing-sm);
+  min-width: 36px;
 }
 
 .search-container {
@@ -874,7 +887,8 @@ body, p {
 
 .book-cover {
   width: 100%;
-  height: 140px;
+  height: auto;
+  aspect-ratio: 2 / 3;
   object-fit: cover;
   border-radius: var(--radius-sm);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
@@ -882,13 +896,85 @@ body, p {
 
 .book-cover-placeholder {
   width: 100%;
-  height: 140px;
+  height: auto;
+  aspect-ratio: 2 / 3;
   background: var(--color-medium-brown);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-muted-gold);
+}
+
+/* Generated initial-letter cover for books with no image */
+.book-cover-generated {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.book-initial {
+  font-size: clamp(32px, 8vw, 52px);
+  font-weight: 700;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  line-height: 1;
+  user-select: none;
+}
+
+/* Camera upload button — shown in bottom-right corner of letter covers */
+.cover-upload-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.50);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+  z-index: 2;
+}
+
+.book-card:hover .cover-upload-btn,
+.book-card:focus-within .cover-upload-btn {
+  opacity: 1;
+}
+
+.cover-upload-btn:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+/* On touch screens always show it — there is no hover */
+@media (hover: none) {
+  .cover-upload-btn {
+    opacity: 1;
+  }
+}
+
+/* Inline link-style button used inside error messages */
+.btn-link {
+  display: inline;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 4px;
+  color: var(--color-gold);
+  font-size: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.btn-link:hover {
+  color: var(--color-golden-primary);
 }
 
 .book-status-pill {
@@ -941,6 +1027,35 @@ body, p {
 
 .empty-state h2 {
   margin-bottom: var(--spacing-md);
+}
+
+/* Load More Button */
+.load-more-btn {
+  grid-column: 1 / -1; /* span all grid columns */
+  display: block;
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin-top: var(--spacing-md);
+  background: transparent;
+  border: 1px solid rgba(217, 191, 140, 0.3);
+  border-radius: var(--radius-sm);
+  color: var(--color-gold);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.load-more-btn:hover,
+.load-more-btn:focus-visible {
+  background: rgba(217, 191, 140, 0.08);
+  border-color: rgba(217, 191, 140, 0.6);
+  outline: none;
+}
+
+.load-more-btn:active {
+  background: rgba(217, 191, 140, 0.15);
 }
 
 .fab-container {
@@ -1786,12 +1901,9 @@ body, p {
   /* Bookshelf View */
   .bookshelf-container {
     padding: var(--spacing-lg);
-  }
-
-  .bookshelf-nav {
-    flex-direction: column;
-    gap: var(--spacing-md);
-    align-items: stretch;
+    width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
   }
 
   .bookshelf-title {
@@ -1803,22 +1915,28 @@ body, p {
     width: 100%;
   }
 
-  /* Books Grid - 3 columns on mobile */
+  /* Books Grid - fluid columns, no overflow */
   .books-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-sm);
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    padding: 0;
+    width: 100%;
   }
 
   .book-card {
     padding: var(--spacing-xs);
+    width: 100%;
+    margin: 0;
   }
 
   .book-cover {
-    height: 110px;
+    height: auto;
+    aspect-ratio: 2 / 3;
   }
 
   .book-cover-placeholder {
-    height: 110px;
+    height: auto;
+    aspect-ratio: 2 / 3;
   }
 
   .book-cover-placeholder svg {

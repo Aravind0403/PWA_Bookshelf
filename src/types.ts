@@ -8,7 +8,7 @@ export interface Book {
   id: string;
   title: string;
   author: string;
-  coverImage: string;
+  coverImage?: string; // optional — absent when no cover is available
   status: ReadingStatus;
   dateAdded?: Date;
   dateCompleted?: Date;
